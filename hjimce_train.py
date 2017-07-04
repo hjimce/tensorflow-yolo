@@ -7,6 +7,3 @@ options = {"model": "cfg/tiny-yolo-voc.cfg", "train": 1,"dataset":"VOCdevkit/VOC
 tfnet = TFNet(options)
 tfnet.train()
 
-imgcv = cv2.imread("./sample_img/dog.jpg")
-result = tfnet.return_predict(imgcv)
-print(result)

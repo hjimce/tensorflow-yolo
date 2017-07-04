@@ -5,6 +5,7 @@ import tensorflow as tf
 import pickle
 from multiprocessing.pool import ThreadPool
 import compress
+import cv2
 
 train_stats = (
     'Training statistics: \n'
@@ -37,6 +38,11 @@ def train(self):
     batches = self.framework.shuffle()
     loss_op = self.framework.loss
 
+
+
+
+
+    count=0
     for i, (x_batch, datum) in enumerate(batches):
         if not i: self.say(train_stats.format(
             self.FLAGS.lr, self.FLAGS.batch,
@@ -55,10 +61,6 @@ def train(self):
         fetches = [self.train_op, loss_op, self.summary_op] 
         fetched = self.sess.run(fetches, feed_dict)
 
-
-
-
-
         loss = fetched[1]
 
         if loss_mva is None: loss_mva = loss
@@ -73,7 +75,22 @@ def train(self):
 
         ckpt = (i+1) % (self.FLAGS.save // self.FLAGS.batch)
         args = [step_now, profile]
-        if not ckpt: _save_ckpt(self, *args)
+        if not ckpt:
+
+            _save_ckpt(self, *args)
+
+        if count%100==0:
+            imgcv = cv2.imread("./sample_img/dog.jpg")
+            result = self.return_predict(imgcv)
+            for item in result:
+                    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", item)
+                    cv2.rectangle(imgcv, (item['topleft']['x'], item['topleft']['y']),
+                                  (item['bottomright']['x'], item['bottomright']['y']), (255, 0, 0), 2)
+                    # cv2.imshow("result",imgcv)
+                    # cv2.waitKey(0)
+            cv2.imwrite('test_prune/' + str(count) + '.jpg', imgcv)
+        count += 1
+
 
     if ckpt: _save_ckpt(self, *args)
 
